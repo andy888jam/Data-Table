@@ -34,7 +34,12 @@
       </tr>
     </table>
     <div class="pagination" @click="switchPage">
-      <span v-for="(item, index) in pages" :key="index">{{ item }}</span>
+      <span
+        v-for="(item, index) in pages"
+        :key="index"
+        :class="{ active: currentPage === item }"
+        >{{ item }}</span
+      >
     </div>
   </div>
 </template>
@@ -92,6 +97,7 @@ export default {
         });
     },
     getItemByPage(page) {
+      this.currentPage = page;
       const startIndex = (page - 1) * MOVIES_PER_PAGE;
       let data = this.filteredLaunches.length
         ? this.filteredLaunches
@@ -107,8 +113,8 @@ export default {
       this.pages = pagesArr;
     },
     switchPage(event) {
-      const currentPage = Number(event.target.innerText);
-      this.launches = this.getItemByPage(currentPage);
+      this.currentPage = Number(event.target.innerText);
+      this.launches = this.getItemByPage(this.currentPage);
     },
     ascendingMission() {
       if (!this.filteredLaunches.length) {
@@ -196,15 +202,24 @@ export default {
         launch =>
           launch.mission_name.toLowerCase().includes(keyword) ||
           launch.rocket.rocket_name.toLowerCase().includes(keyword) ||
-          launch.rocket.rocket_type.toLowerCase().includes(keyword)
+          launch.rocket.rocket_type.toLowerCase().includes(keyword) ||
+          this.formatSearchTime(launch.launch_date_local)
+            .toLowerCase()
+            .includes(keyword)
       );
       if (this.filteredLaunches.length) {
         this.launches = this.getItemByPage(1);
         this.renderPaginator(this.filteredLaunches.length);
+        this.currentPage = 1;
       } else {
         this.launches = [];
         this.renderPaginator(this.filteredLaunches.length);
       }
+    },
+    formatSearchTime(dateTime) {
+      const arr = dateTime.split('T');
+      const date = arr[0];
+      return moment(date).format('YYYY/MM/DD');
     },
   },
 };
@@ -215,6 +230,7 @@ table {
   border-collapse: collapse;
   margin: 10px auto;
 }
+
 table,
 th,
 td {
@@ -222,6 +238,7 @@ td {
   padding: 10px;
   text-align: center;
 }
+
 th,
 td {
   width: 200px;
@@ -231,6 +248,7 @@ td {
   margin-top: 10px;
   display: flex;
   justify-content: center;
+  cursor: pointer;
 }
 
 .pagination span {
@@ -238,7 +256,6 @@ td {
   float: left;
   padding: 8px 16px;
   text-decoration: none;
-  transition: background-color 0.3s;
 }
 
 .pagination span.active {
@@ -249,11 +266,12 @@ td {
 button {
   all: unset;
   margin-left: 15px;
+  cursor: pointer;
 }
 
 input {
   width: 70%;
-  height: 20px;
+  height: 25px;
 }
 
 .searchBar {
