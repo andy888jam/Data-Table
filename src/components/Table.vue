@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div class="searchBar">
+      <input placeholder="Search..." @input="onInput" />
+    </div>
     <table>
       <tr>
         <th>
@@ -90,7 +93,10 @@ export default {
     },
     getItemByPage(page) {
       const startIndex = (page - 1) * MOVIES_PER_PAGE;
-      return this.allLaunches.slice(startIndex, startIndex + MOVIES_PER_PAGE);
+      let data = this.filteredLaunches.length
+        ? this.filteredLaunches
+        : this.allLaunches;
+      return data.slice(startIndex, startIndex + MOVIES_PER_PAGE);
     },
     renderPaginator(amount) {
       const numberOfPages = Math.ceil(amount / MOVIES_PER_PAGE);
@@ -105,55 +111,86 @@ export default {
       this.launches = this.getItemByPage(currentPage);
     },
     ascendingMission() {
-      
-      this.allLaunches = this.allLaunches.sort(function (a, b) {
-        return a.mission_name > b.mission_name ? 1 : -1;
-      });
+      if (!this.filteredLaunches.length) {
+        return;
+      } else {
+        this.filteredLaunches = this.filteredLaunches.sort(function (a, b) {
+          return a.mission_name > b.mission_name ? 1 : -1;
+        });
+      }
       this.launches = this.getItemByPage(1);
     },
     descendingMission() {
-      this.allLaunches = this.allLaunches.sort(function (a, b) {
-        return a.mission_name < b.mission_name ? 1 : -1;
-      });
+      if (!this.filteredLaunches.length) {
+        return;
+      } else {
+        this.filteredLaunches = this.filteredLaunches.sort(function (a, b) {
+          return a.mission_name < b.mission_name ? 1 : -1;
+        });
+      }
       this.launches = this.getItemByPage(1);
     },
     ascendingRocketName() {
-      this.allLaunches = this.allLaunches.sort(function (a, b) {
-        return a.rocket.rocket_name > b.rocket.rocket_name ? 1 : -1;
-      });
+      if (!this.filteredLaunches.length) {
+        return;
+      } else {
+        this.filteredLaunches = this.filteredLaunches.sort(function (a, b) {
+          return a.rocket.rocket_name > b.rocket.rocket_name ? 1 : -1;
+        });
+      }
       this.launches = this.getItemByPage(1);
     },
     descendingRocketName() {
-      this.allLaunches = this.allLaunches.sort(function (a, b) {
-        return a.rocket.rocket_name < b.rocket.rocket_name ? 1 : -1;
-      });
+      if (!this.filteredLaunches.length) {
+        return;
+      } else {
+        this.filteredLaunches = this.filteredLaunches.sort(function (a, b) {
+          return a.rocket.rocket_name < b.rocket.rocket_name ? 1 : -1;
+        });
+      }
       this.launches = this.getItemByPage(1);
     },
     ascendingRocketType() {
-      this.allLaunches = this.allLaunches.sort(function (a, b) {
-        return a.rocket.rocket_type > b.rocket.rocket_type ? 1 : -1;
-      });
+      if (!this.filteredLaunches.length) {
+        return;
+      } else {
+        this.filteredLaunches = this.filteredLaunches.sort(function (a, b) {
+          return a.rocket.rocket_type > b.rocket.rocket_type ? 1 : -1;
+        });
+      }
       this.launches = this.getItemByPage(1);
     },
     descendingRocketType() {
-      this.allLaunches = this.allLaunches.sort(function (a, b) {
-        return a.rocket.rocket_type < b.rocket.rocket_type ? 1 : -1;
-      });
+      if (!this.filteredLaunches.length) {
+        return;
+      } else {
+        this.filteredLaunches = this.filteredLaunches.sort(function (a, b) {
+          return a.rocket.rocket_type < b.rocket.rocket_type ? 1 : -1;
+        });
+      }
       this.launches = this.getItemByPage(1);
     },
     ascendingLaunchDate() {
-      this.allLaunches = this.allLaunches.sort(function (a, b) {
-        return a.launch_date_local > b.launch_date_local ? 1 : -1;
-      });
+      if (!this.filteredLaunches.length) {
+        return;
+      } else {
+        this.filteredLaunches = this.filteredLaunches.sort(function (a, b) {
+          return a.launch_date_local > b.launch_date_local ? 1 : -1;
+        });
+      }
       this.launches = this.getItemByPage(1);
     },
     descendingLaunchDate() {
-      this.allLaunches = this.allLaunches.sort(function (a, b) {
-        return a.launch_date_local < b.launch_date_local ? 1 : -1;
-      });
+      if (!this.filteredLaunches.length) {
+        return;
+      } else {
+        this.filteredLaunches = this.filteredLaunches.sort(function (a, b) {
+          return a.launch_date_local < b.launch_date_local ? 1 : -1;
+        });
+      }
       this.launches = this.getItemByPage(1);
     },
-    filterLaunches(event) {
+    onInput(event) {
       const keyword = event.target.value.trim().toLowerCase();
       this.filteredLaunches = this.allLaunches.filter(
         launch =>
@@ -161,6 +198,13 @@ export default {
           launch.rocket.rocket_name.toLowerCase().includes(keyword) ||
           launch.rocket.rocket_type.toLowerCase().includes(keyword)
       );
+      if (this.filteredLaunches.length) {
+        this.launches = this.getItemByPage(1);
+        this.renderPaginator(this.filteredLaunches.length);
+      } else {
+        this.launches = [];
+        this.renderPaginator(this.filteredLaunches.length);
+      }
     },
   },
 };
@@ -182,11 +226,13 @@ th,
 td {
   width: 200px;
 }
+
 .pagination {
   margin-top: 10px;
   display: flex;
   justify-content: center;
 }
+
 .pagination span {
   color: black;
   float: left;
@@ -203,5 +249,15 @@ td {
 button {
   all: unset;
   margin-left: 15px;
+}
+
+input {
+  width: 70%;
+  height: 20px;
+}
+
+.searchBar {
+  margin: 20px;
+  text-align: center;
 }
 </style>
